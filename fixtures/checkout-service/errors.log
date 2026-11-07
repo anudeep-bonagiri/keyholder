@@ -1,0 +1,11 @@
+2026-11-07T17:21:59Z WARN  checkout-service v2.14.0 started, 6 pods healthy
+2026-11-07T17:22:14Z ERROR checkout-service pod-3 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:22:15Z ERROR checkout-service pod-1 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:22:17Z ERROR checkout-service pod-5 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:22:20Z ERROR checkout-service pod-2 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:23:02Z ERROR checkout-service pod-4 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:23:40Z ERROR checkout-service pod-3 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:24:11Z ERROR checkout-service pod-6 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:25:05Z ERROR checkout-service pod-1 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:26:33Z ERROR checkout-service pod-2 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token
+2026-11-07T17:27:48Z ERROR checkout-service pod-5 POST /checkout/confirm 500 AttributeError: 'NoneType' object has no attribute 'token' at payment_retry.py:17 in retry_with_fresh_token

@@ -1,0 +1,3 @@
+2026-11-07T15:02:11Z deploy checkout-service v2.13.2 by maria  "fix: retry budget off by one"
+2026-11-07T16:40:03Z deploy checkout-service v2.13.3 by devon  "chore: bump sdk"
+2026-11-07T17:21:48Z deploy checkout-service v2.14.0 by sam    "feat: retry payment when token is missing (PAY-881)"
