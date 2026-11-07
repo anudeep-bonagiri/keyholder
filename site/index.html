@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Keyholder walkthrough</title>
+<meta name="description" content="Interactive walkthrough of Keyholder, an incident room on Switch where the rollback runs only on the commander seat's approval.">
+<style>
+  :root { --bg:#0f1116; --panel:#171a21; --line:#2a2f3a; --text:#e8eaf0; --muted:#9aa3b2; --accent:#6ea8ff; --green:#4ade80; --red:#f87171; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text); font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  a { color:var(--accent); }
+  .wrap { max-width:1280px; margin:0 auto; padding:24px 16px 64px; }
+  header h1 { margin:0 0 6px; font-size:32px; letter-spacing:-0.01em; }
+  header p { margin:0 0 6px; color:var(--muted); max-width:900px; }
+  .note { margin:14px 0 20px; padding:10px 14px; border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:8px; color:var(--muted); font-size:14px; background:var(--panel); }
+  .viewer { display:grid; grid-template-columns: 1fr 260px; gap:16px; align-items:start; }
+  @media (max-width: 900px) { .viewer { grid-template-columns:1fr; } }
+  .stage { background:var(--panel); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .stage img { display:block; width:100%; height:auto; aspect-ratio:16/9; background:#0b0d12; }
+  .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:10px 12px; border-top:1px solid var(--line); }
+  button { background:#232834; color:var(--text); border:1px solid var(--line); border-radius:8px; padding:8px 14px; font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:var(--accent); color:#0b1220; border-color:var(--accent); font-weight:600; }
+  .counter { margin-left:auto; color:var(--muted); font-variant-numeric:tabular-nums; font-size:14px; }
+  .beat-now { color:var(--muted); font-size:14px; width:100%; }
+  .beats { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:8px; }
+  .beats h2 { font-size:13px; text-transform:uppercase; letter-spacing:0.08em; color:var(--muted); margin:6px 8px 8px; }
+  .beats button { display:block; width:100%; text-align:left; background:transparent; border:0; padding:8px 10px; border-radius:8px; }
+  .beats button.active { background:#232834; color:var(--accent); }
+  .beats button span { color:var(--muted); font-size:12px; margin-right:8px; font-variant-numeric:tabular-nums; }
+  section { margin-top:36px; }
+  section h2 { font-size:22px; margin:0 0 10px; }
+  .cols { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+  @media (max-width: 900px) { .cols { grid-template-columns:1fr; } }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+  .card h3 { margin:0 0 6px; font-size:16px; }
+  .card p { margin:0; color:var(--muted); font-size:15px; }
+  ol { padding-left:20px; color:var(--muted); }
+  code { background:#232834; padding:2px 6px; border-radius:6px; font-size:14px; }
+  footer { margin-top:40px; color:var(--muted); font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Keyholder</h1>
+    <p>An incident room where the rollback only runs when the person holding the commander seat approves it, customers are told in their own room by the one agent allowed to speak to them, and a rogue "just roll it back" is refused.</p>
+    <p>Interactive walkthrough of the Switch room. Step through every state of the incident, or press play.</p>
+  </header>
+  <div class="note">This page replays the designed workflow. The real thing runs inside Switch Console with Claude Code; see the <a href="https://github.com/anudeep-bonagiri/keyholder">repo</a> to run it.</div>
+
+  <div class="viewer">
+    <div class="stage">
+      <img id="frame" src="frames/s000.jpg" alt="Keyholder room state" width="1600" height="900">
+      <div class="controls">
+        <button id="prev" aria-label="Previous state">Prev</button>
+        <button id="play" class="primary" aria-label="Play">Play</button>
+        <button id="next" aria-label="Next state">Next</button>
+        <span class="counter" id="counter">state 1 of 76</span>
+        <span class="beat-now" id="beatnow"></span>
+      </div>
+    </div>
+    <nav class="beats" aria-label="Beats">
+      <h2>Beats</h2>
+      <div id="beats"></div>
+    </nav>
+  </div>
+
+  <section>
+    <h2>How the gate works</h2>
+    <div class="cols">
+      <div class="card"><h3>The commander seat</h3><p>A room document the investigator creates and owns. It re-reads it before every action and accepts "approve: rollback" only from the person named as holder. Claim, handoff, release and override each append a dated log line. Anyone else is refused in one line and nothing runs.</p></div>
+      <div class="card"><h3>The Switch approval card</h3><p>When the investigator finally runs rollback.sh, Switch turns Claude Code's permission request into a card in the channel: Allow once, Allow for this session, Decline. Only the room owner can answer it. That gate is enforced by the Switch server, not by a prompt.</p></div>
+      <div class="card"><h3>The customer room</h3><p>The communicator is the only agent in the linked status room, which can live on Telegram or Discord. It posts only text the investigator marked approved, rewritten in plain language, under 60 words. The investigator is never in that room.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Run it yourself</h2>
+    <ol>
+      <li>Install Switch Console from the Switch releases page and finish the quickstart (local server, switch-buddy answering).</li>
+      <li>Optional: connect Telegram or Discord under Messaging apps. The status room will use it automatically. With neither connected, both rooms land on the bundled Mattermost.</li>
+      <li>In Switch Console, open Templates, import <code>keyholder.template.yaml</code> from the repo, and run it. Keep <code>team</code> as <code>checkout</code>. The agents clone the repo, so the fixtures are already there.</li>
+      <li>Open <code>checkout-war-room</code> and follow <code>demo/SCRIPT.md</code>.</li>
+    </ol>
+    <p><a href="https://github.com/anudeep-bonagiri/keyholder">github.com/anudeep-bonagiri/keyholder</a></p>
+  </section>
+
+  <footer>Built for the WeMakeDevs and DevTools Academy Flip the Switch hackathon, November 2026. Switch is by SandboxAQ.</footer>
+</div>
+<script>
+const DATA = {"durations": [8.808, 2.0, 0.25, 0.25, 0.25, 1.125, 1.125, 1.75, 0.208, 0.208, 0.208, 4.025, 0.417, 0.417, 0.417, 5.95, 0.375, 0.375, 0.375, 1.562, 1.562, 1.562, 1.562, 1.562, 1.562, 1.562, 1.562, 1.562, 4.132, 0.375, 0.375, 0.375, 1.5, 0.25, 0.25, 0.25, 2.0, 3.673, 0.333, 0.333, 0.333, 1.25, 0.208, 0.208, 0.208, 1.25, 4.059, 0.333, 0.333, 0.333, 1.25, 0.25, 0.25, 0.25, 1.5, 2.75, 2.25, 0.25, 0.25, 0.25, 1.75, 1.75, 2.75, 1.25, 0.375, 0.375, 0.375, 1.375, 1.375, 5.843, 0.292, 0.292, 0.292, 1.25, 5.627, 10.128], "beats": [{"name": "Title", "state": 0}, {"name": "Kickoff", "state": 1}, {"name": "Incident report", "state": 12}, {"name": "Findings", "state": 16}, {"name": "Rogue approval refused", "state": 29}, {"name": "Seat claimed", "state": 38}, {"name": "Approval and rollback", "state": 47}, {"name": "Customer room", "state": 63}, {"name": "Postmortem", "state": 70}, {"name": "Switch primitives", "state": 75}]};
+const N = DATA.durations.length;
+const img = document.getElementById('frame'), counter = document.getElementById('counter'), beatnow = document.getElementById('beatnow');
+const beatsEl = document.getElementById('beats'), playBtn = document.getElementById('play');
+let i = 0, playing = false, timer = null;
+const src = k => `frames/s${String(k).padStart(3,'0')}.jpg`;
+function beatOf(k){ let b = 0; DATA.beats.forEach((bt, j) => { if (k >= bt.state) b = j; }); return b; }
+function render(){
+  img.src = src(i);
+  if (i + 1 < N) { const pre = new Image(); pre.src = src(i + 1); }
+  counter.textContent = `state ${i + 1} of ${N}`;
+  const b = beatOf(i); beatnow.textContent = `${b + 1}. ${DATA.beats[b].name}`;
+  [...beatsEl.children].forEach((el, j) => el.classList.toggle('active', j === b));
+}
+function go(k){ i = Math.max(0, Math.min(N - 1, k)); render(); }
+function stop(){ playing = false; clearTimeout(timer); playBtn.textContent = 'Play'; }
+function tick(){
+  if (!playing) return;
+  if (i >= N - 1) { stop(); return; }
+  timer = setTimeout(() => { go(i + 1); tick(); }, DATA.durations[i] * 1000);
+}
+playBtn.onclick = () => { if (playing) { stop(); return; } if (i >= N - 1) go(0); playing = true; playBtn.textContent = 'Pause'; tick(); };
+document.getElementById('prev').onclick = () => { stop(); go(i - 1); };
+document.getElementById('next').onclick = () => { stop(); go(i + 1); };
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') { stop(); go(i + 1); }
+  else if (e.key === 'ArrowLeft') { stop(); go(i - 1); }
+  else if (e.key === ' ') { e.preventDefault(); playBtn.click(); }
+});
+DATA.beats.forEach((bt, j) => {
+  const b = document.createElement('button'); b.innerHTML = `<span>${j + 1}</span>${bt.name}`;
+  b.onclick = () => { stop(); go(bt.state); }; beatsEl.appendChild(b);
+});
+render();
+</script>
+</body>
+</html>
