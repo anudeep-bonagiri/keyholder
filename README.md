@@ -2,7 +2,7 @@
 
 An incident room on Switch where the rollback runs only when the person holding the commander seat approves it, customers are told in their own room by the one agent allowed to speak to them, and a rogue "just roll it back" is refused.
 
-- **Demo video (2:00):** https://youtu.be/Hnc95tahglM
+- **Demo video (2:00):** https://youtu.be/Hnc95tahglM. A rendered walkthrough of the designed run, labeled as such on every frame. Every number and command output on screen is the real fixture output; the chat UI is drawn, not screen-recorded.
 - **Interactive walkthrough:** https://keyholder-demo.vercel.app (step through all 76 room states, or press play)
 - **The template:** [`keyholder.template.yaml`](keyholder.template.yaml)
 
