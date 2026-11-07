@@ -2,8 +2,8 @@
 
 An incident room on Switch where the rollback runs only when the person holding the commander seat approves it, customers are told in their own room by the one agent allowed to speak to them, and a rogue "just roll it back" is refused.
 
-- **Demo video (2:00):** _link_
-- **Interactive walkthrough:** _link_
+- **Demo video (2:00):** https://youtu.be/Hnc95tahglM
+- **Interactive walkthrough:** https://keyholder-demo.vercel.app (step through all 76 room states, or press play)
 - **The template:** [`keyholder.template.yaml`](keyholder.template.yaml)
 
 Built for the WeMakeDevs x DevTools Academy **Flip the Switch** hackathon, Nov 4 to 7, 2026. Track: Best Business Workflow. Every file here was written inside the hackathon window.

@@ -10,7 +10,9 @@ Form: https://www.wemakedevs.org/hackathons/switch/submit (WeMakeDevs sign-in)
 
 **Repo:** https://github.com/anudeep-bonagiri/keyholder
 
-**Demo video:** (paste link)
+**Demo video:** https://youtu.be/Hnc95tahglM
+
+**Live demo:** https://keyholder-demo.vercel.app
 
 **Description (longer field):**
 Keyholder is a Switch room template that stands up two agents and two linked rooms in one pass. The investigator sits in the engineering war room: on an incident report it reads the deploy log, metrics, error log and the source line in the stack trace, posts a timeline with quoted evidence, and proposes exactly one remediation with a dry-run preview. It never acts on that proposal unless the approval comes from whoever holds the commander seat, a room document it owns and re-reads before every action. The seat can be claimed, handed off mid-incident and released, and every change is logged. Switch's own approval card to the room owner is the second, server-side gate. The communicator agent is the only agent in the customer status room, which can live on a different messaging app, and it posts only text the investigator has marked approved, rewritten in plain language. The demo opens with a rogue approval being refused, then shows the real one run, the customer update land in the other room, and the postmortem document with the seat log.
