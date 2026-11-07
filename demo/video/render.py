@@ -13,6 +13,10 @@ TEXT = (232, 234, 238); MUTED = (140, 146, 160); ACCENT = (96, 165, 250)
 GREEN = (74, 222, 128); RED = (248, 113, 113); AMBER = (251, 191, 36)
 CODEBG = (12, 13, 16); CARDBG = (34, 38, 47)
 OUT_DIR = sys.argv[1]; OUT_MP4 = sys.argv[2]; SPEED = 1.25
+import json
+DRY = os.environ.get("DRY") == "1"
+NARR = json.load(open(os.environ["NARR"])) if os.environ.get("NARR") else {}
+PAD = float(os.environ.get("PAD", "0.6"))
 os.makedirs(OUT_DIR, exist_ok=True)
 
 def font(size, bold=False, mono=False):
@@ -210,10 +214,12 @@ states = []  # (png path, seconds)
 n = [0]
 def shot(room, msgs, dur, typing=None, reveal=None):
     p = os.path.join(OUT_DIR, f"f{n[0]:04d}.png"); n[0] += 1
-    render_state(p, room, msgs, typing, reveal); states.append((p, dur * SPEED))
+    if not DRY: render_state(p, room, msgs, typing, reveal)
+    states.append((p, dur * SPEED))
 def card(lines, dur):
     p = os.path.join(OUT_DIR, f"f{n[0]:04d}.png"); n[0] += 1
-    render_card(p, lines); states.append((p, dur * (1.0 if lines[0][1] == "Keyholder" else SPEED)))
+    if not DRY: render_card(p, lines)
+    states.append((p, dur * (1.0 if lines[0][1] == "Keyholder" else SPEED)))
 
 def post(room, history, m, typing_s=0.8, chunk_s=0.9, hold=1.2, typing_name=None):
     """Append message m to history with a typing pause and chunked reveal."""
@@ -225,15 +231,28 @@ def post(room, history, m, typing_s=0.8, chunk_s=0.9, hold=1.2, typing_name=None
         shot(room, history + [(m, k)], chunk_s if k < nb else hold)
     history.append((m, nb))
 
+marks = []; _beat = [None, 0.0]
+def mark(name):
+    """Close the previous beat (stretching its last frame so narration fits) and open a new one."""
+    now = sum(d for _, d in states)
+    prev, start = _beat
+    if prev is not None and prev in NARR:
+        need = NARR[prev] + PAD; have = now - start
+        if need > have:
+            p, d = states[-1]; states[-1] = (p, d + (need - have)); now += need - have
+    marks.append((name, round(now, 3))); _beat[0] = name; _beat[1] = now
+
 ONE_LINER = ("An incident room where the rollback only runs when the person holding the commander seat "
              "approves it, customers are told in their own room by the one agent allowed to speak to them, "
              "and a rogue \"just roll it back\" is refused.")
 
 # 1 title
+mark("01")
 card([(F_H1, "Keyholder", TEXT), (F_H2, ONE_LINER, MUTED), (F_H3, "Flip the Switch hackathon, Nov 2026", ACCENT)], 3.0)
 
 war = []
 # 2 kickoff
+mark("02")
 post("war", war, msg("Switch", "system", [T("Created checkout-war-room and checkout-status from keyholder.template.yaml. Agents: checkout-investigator, checkout-comms. Documents: RUNBOOK, COMMS-POLICY. Rooms linked: customer status.")], "17:28"), typing_s=0, chunk_s=0.5, hold=1.6)
 post("war", war, msg("checkout-investigator", "agent", [
     T("Created COMMANDER-SEAT. holder: (empty). Responder role taken."),
@@ -242,9 +261,11 @@ post("war", war, msg("checkout-investigator", "agent", [
 post("war", war, msg("checkout-comms", "agent", [T("Communicator role taken. I post in checkout-status only, and only text marked APPROVED FOR CUSTOMERS.")], "17:28"), typing_s=0.5, hold=1.6)
 
 # 3 incident report
+mark("03")
 post("war", war, msg("anudeep", "human", [T("@checkout-investigator checkout is failing for customers, 500s on /checkout/confirm since about 17:22 UTC. Investigate.")], "17:29"), typing_s=1.0, hold=1.6)
 
 # 4 findings
+mark("04")
 post("war", war, msg("checkout-investigator", "agent", [
     T("Acknowledged. Running status, then reading deploys.log, metrics.csv, errors.log and the source line in the stack trace."),
     CODE(["$ ./status.sh", "checkout-service  release=v2.14.0  error_rate=18.7%  p95=2301ms  status=DEGRADED"]),
@@ -259,6 +280,7 @@ post("war", war, msg("checkout-investigator", "agent", [
     typing_s=0.9, chunk_s=1.25, hold=2.2)
 
 # 5 rogue approval
+mark("05")
 post("war", war, msg("anudeep", "human", [T("approve: rollback")], "17:29"), typing_s=0.9, hold=1.2)
 post("war", war, msg("checkout-investigator", "agent", [
     ALERT("Refused. Nobody holds the commander seat, so this is not an approval. The proposal stays open. Nothing ran."),
@@ -266,6 +288,7 @@ post("war", war, msg("checkout-investigator", "agent", [
     typing_s=0.6, chunk_s=1.6, hold=2.4)
 
 # 6 claim
+mark("06")
 post("war", war, msg("anudeep", "human", [T("commander: claim")], "17:31"), typing_s=0.8, hold=1.0)
 post("war", war, msg("checkout-investigator", "agent", [
     T("Seat holder: anudeep, since 17:31:04Z."),
@@ -273,6 +296,7 @@ post("war", war, msg("checkout-investigator", "agent", [
     typing_s=0.5, chunk_s=1.0, hold=2.0)
 
 # 7 approval
+mark("07")
 post("war", war, msg("anudeep", "human", [T("approve: rollback")], "17:31"), typing_s=0.8, hold=1.0)
 appr = msg("checkout-investigator", "agent", [
     T("Re-read COMMANDER-SEAT: holder is anudeep, and this message is from anudeep. Approval accepted. Requesting permission to run ./rollback.sh."),
@@ -287,6 +311,7 @@ post("war", war, msg("checkout-investigator", "agent", [
     typing_s=0.6, chunk_s=1.4, hold=2.2)
 
 # 8 customer room
+mark("08")
 status = []
 post("status", status, msg("checkout-comms", "agent", [T("Hello. Updates here are posted only after they are approved in the incident room.")], "17:28"), typing_s=0, chunk_s=0.5, hold=1.0)
 post("status", status, msg("checkout-comms", "agent", [
@@ -295,6 +320,7 @@ post("status", status, msg("checkout-comms", "agent", [
     T("No action is needed. Orders that failed were not charged.")], "17:32"), typing_s=0.9, chunk_s=1.1, hold=2.6)
 
 # 9 postmortem
+mark("09")
 post("war", war, msg("checkout-investigator", "agent", [
     T("Postmortem written as a room document."),
     DOC("INCIDENT-2026-11-07-chk1", [
@@ -309,10 +335,15 @@ post("war", war, msg("checkout-investigator", "agent", [
     typing_s=0.7, chunk_s=1.0, hold=4.5)
 
 # 10 end card
+mark("10")
 card([(F_H3, "Switch primitives used", ACCENT),
       (F_H2, "one template, linked rooms on two apps, addressing policy, roles, room documents, approval cards", TEXT),
       (F_H3, "github.com/anudeep-bonagiri/keyholder", MUTED)], 5.0)
 
+mark("end")
+json.dump(marks, open(os.path.join(OUT_DIR, "marks.json"), "w"))
+print("marks", marks)
+if DRY: sys.exit(0)
 # ---------- encode ----------
 lst = os.path.join(OUT_DIR, "list.txt")
 with open(lst, "w") as f:

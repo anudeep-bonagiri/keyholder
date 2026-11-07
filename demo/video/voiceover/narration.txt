@@ -1,0 +1,10 @@
+01|This is Keyholder, an incident room built on Switch, where a rollback runs only when the person holding the commander seat approves it.
+02|Two agents, two linked rooms, one template. At kickoff the investigator creates the commander seat document. The seat is empty, and it states the one rule.
+03|An engineer reports that checkout is failing. Anyone in the room can report. That is the addressing policy.
+04|The investigator reads the deploy log, the metrics, the error log, and the source line in the stack trace. The error rate jumped from a third of a percent to nineteen percent, one minute after the 2.14 deploy. It proposes exactly one remediation, with a dry run preview, and waits.
+05|Here is the point of the room. Someone types approve rollback. Nobody holds the seat, so it is refused in one line. Nothing ran.
+06|The on-call engineer claims the seat. The document logs who holds it and since when. It can be handed off mid incident.
+07|Now the holder approves. The investigator requests the command, and Switch turns that into an approval card for the room owner. One tap. The rollback runs, and the service is healthy again.
+08|In the linked customer room, on a different app, the communicator posts the only thing customers ever see. Plain language. No versions, no internal names.
+09|The postmortem is written as a room document, with the seat log. Who was refused, who approved, who allowed.
+10|Switch carries all of it. The template, linked rooms on two apps, addressing policy, roles, room documents, and approval cards. Keyholder.
