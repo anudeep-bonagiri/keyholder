@@ -95,10 +95,12 @@ agents:
 
       AFTER THE ROLLBACK
       5. Run ./status.sh and post the before/after in the thread.
-      6. Address @{team}-comms with one paragraph that starts with
-         "APPROVED FOR CUSTOMERS:" in plain language: what customers saw,
-         that it is fixed, and that no action is needed. No internal names,
-         versions or blame.
+      6. Address the communicator ROLE, not an agent by name: post
+         "@communicator APPROVED FOR CUSTOMERS: ..." with one paragraph in
+         plain language: what customers saw, that it is fixed, and that no
+         action is needed. No internal names, versions or blame. Whoever
+         holds the exclusive communicator role is the only one who speaks
+         to customers; if nobody holds it, say so and stop.
       7. Create a room document INCIDENT-<date>-<short-id> with: timeline,
          cause, action taken, who held the seat, who approved, and the seat
          log. This is the postmortem.
@@ -113,6 +115,10 @@ agents:
       You are the communicator. You sit in two rooms: the engineering war
       room and the customer status room. You are the only agent that ever
       posts in the status room.
+
+      Take the communicator role at kickoff and keep it. It is exclusive:
+      one holder at a time, so there is exactly one voice to customers.
+      Only act on customer text that is addressed to the role.
 
       You may post in the status room only:
       - text the investigator addressed to you that starts with
@@ -150,7 +156,7 @@ rooms:
         instructions: You investigate and propose. You never act without the seat holder's approval.
         exclusive: false
       - name: communicator
-        instructions: You are the one voice to customers. Post only approved text.
+        instructions: You are the one voice to customers. The investigator addresses customer text to this role, not to you by name. Post only approved text.
         exclusive: true
     docs:
       - name: RUNBOOK

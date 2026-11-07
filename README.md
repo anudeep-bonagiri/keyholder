@@ -30,9 +30,17 @@ Incident bots are everywhere now. An agent reads the logs, proposes a rollback, 
 | **Room documents** | The commander seat, the runbook, the comms policy and the postmortem live in the room where everyone can read them. The investigator re-reads the seat before every action and logs every change. | The seat lives in one agent's memory, invisible and unauditable. |
 | **Approval cards** | When the investigator runs `rollback.sh`, Switch turns Claude Code's permission request into a card the room owner answers in chat. Enforced by the Switch server. | The agent's own judgment is the only gate. |
 | **Linked rooms on two bridges** | The war room runs on Mattermost or Slack. The status room takes Telegram or Discord when connected. One conversation for the agents, two audiences for people. | Customers sit in the engineering channel, or a human copies updates by hand. |
-| **Roles** | The communicator role is exclusive. There is one voice to customers even if more agents join the room. | Two agents post conflicting updates. |
+| **Roles** | The investigator hands customer text to the `communicator` role, not to an agent by name. The role is exclusive, so whoever holds it is the one voice to customers, and swapping the agent behind it changes nothing else in the room. | Two agents post conflicting updates, and replacing the comms agent means rewriting the investigator. |
 
 Take Switch away and you have two CLI sessions, a shell script and a Slack bot that anyone can trigger.
+
+## Check it in one command
+
+```
+scripts/check.sh
+```
+
+Round-trips the fixture (degraded, dry run, rollback, healthy, reset) and checks the template: valid YAML, only documented keys, every param declared is used, every agent a room names exists, every link points at a real room, both agents carry provider, location and directory.
 
 ## Reproduce it in ten minutes
 
