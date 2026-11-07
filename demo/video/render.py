@@ -63,17 +63,27 @@ INITIALS = {"anudeep": "AB", "checkout-investigator": "CI", "checkout-comms": "C
 MAIN_X = 300; MAIN_W = W - MAIN_X - 40; MSG_X = MAIN_X + 90; MSG_W = MAIN_W - 110
 AREA_TOP = 120; AREA_BOTTOM = H - 110
 
+def wrap_lines(lines, f, width):
+    """Word-wrap each line to width; continuation lines keep the original indent plus two spaces."""
+    out = []
+    for ln in lines:
+        indent = len(ln) - len(ln.lstrip(" "))
+        pieces = wrap(ln.strip(), f, width - f.getlength(" " * indent)) or [""]
+        out.append(" " * indent + pieces[0])
+        out += [" " * (indent + 2) + p for p in pieces[1:]]
+    return out
+
 def block_height(b):
     if b["t"] == "text":
         return 36 * len(wrap(b["s"], F_BODY, MSG_W)) + 8
     if b["t"] == "code":
-        return 32 * len(b["lines"]) + 44
+        return 32 * len(wrap_lines(b["lines"], F_MONO, MSG_W - 40)) + 44
     if b["t"] in ("alert", "ok"):
         return 36 * len(wrap(b["s"], F_BOLD, MSG_W - 40)) + 44
     if b["t"] == "card":
         return 190
     if b["t"] == "doc":
-        return 30 * len(b["lines"]) + 90
+        return 30 * len(wrap_lines(b["lines"], F_MONO, MSG_W - 60)) + 90
     return 0
 
 def msg_height(m, nblocks):
@@ -85,10 +95,11 @@ def draw_block(d, b, x, y):
             d.text((x, y), ln, font=F_BODY, fill=TEXT); y += 36
         return y + 8
     if b["t"] == "code":
-        h = 32 * len(b["lines"]) + 34
+        clines = wrap_lines(b["lines"], F_MONO, MSG_W - 40)
+        h = 32 * len(clines) + 34
         d.rounded_rectangle((x, y, x + MSG_W, y + h), 10, fill=CODEBG, outline=LINE)
         yy = y + 16
-        for ln in b["lines"]:
+        for ln in clines:
             col = GREEN if "HEALTHY" in ln or ln.startswith("rolled") else (RED if "DEGRADED" in ln or "ERROR" in ln else (MUTED if ln.startswith("$") else TEXT))
             d.text((x + 18, yy), ln, font=F_MONO, fill=col); yy += 32
         return y + h + 10
@@ -119,13 +130,14 @@ def draw_block(d, b, x, y):
             d.text((bx + 10, y + 132), "Allowed once by anudeep", font=F_SMALL, fill=GREEN)
         return y + h + 10
     if b["t"] == "doc":
-        h = 30 * len(b["lines"]) + 80
+        dlines = wrap_lines(b["lines"], F_MONO, MSG_W - 60)
+        h = 30 * len(dlines) + 80
         d.rounded_rectangle((x, y, x + MSG_W, y + h), 12, fill=(24, 27, 34), outline=LINE)
         d.rectangle((x, y, x + 8, y + h), fill=ACCENT)
         d.text((x + 28, y + 18), b["title"], font=F_NAME, fill=ACCENT)
         d.text((x + 28 + F_NAME.getlength(b["title"]) + 18, y + 22), "room document", font=F_SMALL, fill=MUTED)
         yy = y + 60
-        for ln in b["lines"]:
+        for ln in dlines:
             col = RED if "REFUSED" in ln else (GREEN if "ACCEPTED" in ln else TEXT)
             d.text((x + 28, yy), ln, font=F_MONO if ln.startswith(" ") or "Z " in ln else F_BODY, fill=col); yy += 30
         return y + h + 10
